@@ -82,18 +82,18 @@ class Train:
             valid_loss = val_loss/len(self.val_loader.dataset)
             # Print out the information
             print('Accuracy: ', accuracy/len(self.val_loader))
-            print('Epoch: {} \tTraining Loss: {:.6f} \tValidation Loss: {:.6f}'.format(self.epoch, train_loss, valid_loss))
+            print('Epoch: {} \tTraining Loss: {:.6f} \tValidation Loss: {:.6f}'.format(epoch, train_loss, valid_loss))
             print("*"*50)
 
 if __name__ == "__main__":
-    model = DenseNet161(num_class=2)
+    model = DenseNet161(num_class=2, epochs=2)
     tr_ds = ImageDataset(Config.TRAIN_DATASET)
     train_dl = tr_ds.create_data_loader()
     val_ds = ImageDataset(Config.VALIDATION_DATASET)
     validation_dl = val_ds.create_data_loader()
     tr = Train(
             model = model,
-            epochs = 5,
+            epochs = 2,
             train_loader  = train_dl,
             val_loader = validation_dl,
             optimizer = model.optimizer,
