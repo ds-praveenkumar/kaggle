@@ -24,13 +24,25 @@ class ImageDataset():
                                             transform=self.transformations
                                     )
         return dataset
+    
+    def create_data_loader(self):
+        """ Creates data loader for iterating over training samples """
+        dl = torch.utils.data.DataLoader( 
+                                dataset=self.create_data_set(),
+                                batch_size=32,
+                                shuffle=True,
+                                num_workers=3
+        )
+        return dl
 
 
 if __name__ == "__main__":
-    tr_ds = ImageDataset(str(Config.TRAIN_DATASET))
-    train_dl = tr_ds.create_data_set()
-    val_ds = ImageDataset(str(Config.VALIDATION_DATASET))
-    validation_dl = val_ds.create_data_set()
+    tr_ds = ImageDataset(Config.TRAIN_DATASET)
+    train_dl = tr_ds.create_data_loader()
+    val_ds = ImageDataset(Config.VALIDATION_DATASET)
+    validation_dl = val_ds.create_data_loader()
+    print("train data batches:", len(train_dl))
+    print("validation data batches:", len(validation_dl))
 
 
 
