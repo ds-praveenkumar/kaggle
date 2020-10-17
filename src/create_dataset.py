@@ -20,7 +20,7 @@ class ImageDataset():
     def create_data_set(self):
         """ data set """
         dataset = torchvision.datasets.ImageFolder(
-                                            self.root_dir,
+                                            root=self.root_dir,
                                             transform=self.transformations
                                     )
         return dataset
