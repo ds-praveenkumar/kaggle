@@ -1,47 +1,103 @@
+from create_dataset import ImageDataset
+from config import Config
+from model import DenseNet161
 
-# from src.image_loader import ImageDataLoader
+import torch
+import torchvision
 
-import torch.nn as nn
-from torch.optim import SGD
-import  torch.nn.functional as F
+class Train:
+    """ Trains the convnets """
+    def  __init__(self, epochs, model, train_loader, val_loader, optimizer, criterion, device):
+        """ initilize training parameters """
+        self.epochs = epochs
+        self.model = model
+        self.train_loader = train_loader
+        self.optimizer = optimizer
+        self.criterion = criterion
+        self.val_loader = val_loader
+        self.device = device
 
-class Train(nn.Module):
-    """ This class trains the model for image classification """
-
-    def __init__(self ):
-        """ initiize model parameter """
-        super().__init__()
-        # self.epoch = epoch
-        # self.learning_rate = learning_rate
-        # self.optim =  optim
-        
-    
-        """ builds the convolution neural network """
-        self.conv1 = nn.Conv2d(3, out_channels=32, kernel_size=3 )
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding_mode="zeros")
-        self.conv3 = nn.Conv2d(64, 128, 3)
-        self.fc1 = nn.Linear(in_features = 32 * 5 * 5, out_features = 150)
-        self.fc2 = nn.Linear(in_features = 150,out_features =  90)
-        self.fc3 = nn.Linear(in_features = 90,out_features = 10)
-
-    def forward(self, x):
-        """ create feed forward network """
-        x = F.max_pool2d(F.relu(self.conv1(x)), (2,2))
-        x = F.max_pool2d(F.relu(self.conv2(x)), 2 )
-        x = x.view(-1, self.num_flat_features(x))
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
-
-    def num_flat_features(self, x):
-        """ calculate number of parameters """
-        size = x.size()[1:]
-        num_features = 1
-        for s in size:
-            num_features *= s
-        return num_features 
+    def train(self):
+        """ trains the model """
+        print("*"*50) 
+        for epoch in range(self.epochs):
+            train_loss = 0
+            val_loss = 0
+            accuracy = 0
+            
+            # Training the model
+            counter = 0
+            for inputs, labels in self.train_loader:
+                # Move to device
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                # Clear optimizers
+                self.optimizer.zero_grad()
+                # Forward pass
+                output = self.model.forward(inputs)
+                # Loss
+                loss = self.criterion(output, labels)
+                # Calculate gradients (backpropogation)
+                loss.backward()
+                # Adjust parameters based on gradients
+                self.optimizer.step()
+                # Add the loss to the training set's rnning loss
+                train_loss += loss.item()*inputs.size(0)
+                
+                # Print the progress of our training
+                counter += 1
+                print(counter, "/", len(self.train_loader))
+                
+            # Evaluating the model
+            self.model.eval()
+            counter = 0
+            # Tell torch not to calculate gradients
+            with torch.no_grad():
+                for inputs, labels in self.val_loader:
+                    # Move to device
+                    inputs, labels = inputs.to(self.device), labels.to(self.device)
+                    # Forward pass
+                    output = self.model.forward(inputs)
+                    # Calculate Loss
+                    valloss = self.criterion(output, labels)
+                    # Add loss to the validation set's running loss
+                    val_loss += valloss.item()*inputs.size(0)
+                    
+                    # Since our model outputs a LogSoftmax, find the real 
+                    # percentages by reversing the log function
+                    output = torch.exp(output)
+                    # Get the top class of the output
+                    top_p, top_class = output.topk(1, dim=1)
+                    # See how many of the classes were correct?
+                    equals = top_class == labels.view(*top_class.shape)
+                    # Calculate the mean (get the accuracy for this batch)
+                    # and add it to the running accuracy for this epoch
+                    accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+                    
+                    # Print the progress of our evaluation
+                    counter += 1
+                    print(counter, "/", len(self.val_loader))
+            
+            # Get the average loss for the entire epoch
+            train_loss = train_loss/len(self.train_loader.dataset)
+            valid_loss = val_loss/len(self.val_loader.dataset)
+            # Print out the information
+            print('Accuracy: ', accuracy/len(self.val_loader))
+            print('Epoch: {} \tTraining Loss: {:.6f} \tValidation Loss: {:.6f}'.format(self.epoch, train_loss, valid_loss))
+            print("*"*50)
 
 if __name__ == "__main__":
-    cnn = Train()
-    print(cnn)
+    model = DenseNet161(num_class=2)
+    tr_ds = ImageDataset(Config.TRAIN_DATASET)
+    train_dl = tr_ds.create_data_loader()
+    val_ds = ImageDataset(Config.VALIDATION_DATASET)
+    validation_dl = val_ds.create_data_loader()
+    tr = Train(
+            model = model,
+            epochs = 5,
+            train_loader  = train_dl,
+            val_loader = validation_dl,
+            optimizer = model.optimizer,
+            criterion = torch.nn.CrossEntropyLoss(),
+            device = model.device
+    )
+    tr.train()
