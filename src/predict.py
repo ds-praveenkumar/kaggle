@@ -73,11 +73,16 @@ class Predict:
 
 
 if __name__ == "__main__":
+    """ class 0: Product | class 1: toys """
     # Give image to model to predict output
-    pred = Predict("/mnt/d/kaggle/datasets/images/0a959fb916.jpg")
+    
+    pred = Predict("datasets/images/0a1f3af3af.jpg")
     image = pred.preprocess_image()
     model = torch.load("/mnt/d/kaggle/models/toy_clf_densenet161_v3.1.0.pth")
     top_prob, top_class = pred.predict(image, model)
 
     # Print the results
-    print("The model is ", top_prob*100, "% certain that the image(0a959fb916.jpg) has a predicted class of ", top_class  )
+    if top_class == 0:
+        print(f"The model is {top_prob*100} % certain that the image has a predicted class of: consumer_products")
+    else:
+        print(f"The model is {top_prob*100} % certain that the image has a predicted class of: toys")
