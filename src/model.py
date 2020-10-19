@@ -20,9 +20,9 @@ class DenseNet161:
             param.requires_grad = False
 
         # Replace default classifier with new classifier
-        print("*"*50)
+        print("*"*100)
         print(self.model)
-        print("*"*50)
+        print("*"*100)
         self.optimizer = None
 
     def set_device(self):
@@ -35,6 +35,7 @@ class DenseNet161:
     def train(self, train_loader, val_loader):
         """ trains the model """
         print("*"*100) 
+        print("training started...")
         model = self.model
         # Turn off training for their parameters
         for param in model.parameters():
@@ -117,11 +118,15 @@ class DenseNet161:
             # Print out the information
             print('Accuracy: ', accuracy/len(val_loader))
             print('Epoch: {} \tTraining Loss: {:.6f} \tValidation Loss: {:.6f}'.format(epoch, train_loss, valid_loss))
+            print("saving model...")
+            model_path = str(Config.MODELS) + f"acc_{round(accuracy/len(val_loader), 3)}" + f"_v3.1.{epoch}.pth"
+            torch.save(model, model_path)
+            print("model saved at", model_path)
             print("*"*50)
 
 
 if __name__ == "__main__":
-    model = DenseNet161(num_class=2, epochs=5)
+    model = DenseNet161(num_class=2, epochs=2)
     tr_ds = ImageDataset(Config.TRAIN_DATASET)
     train_dl = tr_ds.create_data_loader()
     val_ds = ImageDataset(Config.VALIDATION_DATASET)
