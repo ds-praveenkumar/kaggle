@@ -4,7 +4,7 @@ import torchvision
 import numpy as np
 from PIL import Image
 
-from config import Config
+from .config import Config
 
 class Predict:
     """ predicts the image to be toy or product """

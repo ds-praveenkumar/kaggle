@@ -1,6 +1,6 @@
-from create_dataset import ImageDataset
-from config import Config
-from model import DenseNet161
+from .create_dataset import ImageDataset
+from .config import Config
+from .model import DenseNet161
 
 import torch
 import torchvision
