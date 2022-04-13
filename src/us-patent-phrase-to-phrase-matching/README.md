@@ -1,6 +1,6 @@
 # USPPM Kaggle Competition
 
-## kaggle notebbok links
+## kaggle notebook links
 1. [uspppm-inference](https://www.kaggle.com/code/prokaggler/uspppm-inference)
 
 usage:
