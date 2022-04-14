@@ -8,8 +8,8 @@ from tqdm import tqdm
 
 tokenizer = AutoTokenizer.from_pretrained( Config.model)   
 
-def train( model, train, val, lr=1e-6, epochs=3):
-    
+def train_bert( model, train, val, lr=1e-6, epochs=3):
+    print( 'train started... ')
     train_patent_ds= PatentTrainDataset(
                         text_input= train.text_input,
                         labels = train.label,
@@ -23,8 +23,7 @@ def train( model, train, val, lr=1e-6, epochs=3):
     )
     train_dl = DataLoader( train_patent_ds, batch_size=Config.batch_size, shuffle=True)
     val_dl = DataLoader( val_patent_ds, batch_size=Config.batch_size, )
-    
-    
+       
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam( model.parameters(), lr = lr)
     if torch.cuda.is_available():
@@ -32,6 +31,7 @@ def train( model, train, val, lr=1e-6, epochs=3):
         criterion = criterion.cuda()
         
     for epoch_num in range(epochs):
+        print( 'Epochs =>', epoch_num) 
         total_acc_train = 0
         total_loss_train = 0
         for item in tqdm(train_dl):

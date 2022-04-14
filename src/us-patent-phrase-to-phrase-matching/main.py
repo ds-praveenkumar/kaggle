@@ -22,4 +22,4 @@ if __name__=='__main__':
     print( 'train samples =>', len( train_data))
     print( 'validation samples =>', len(val_data))
     model = PatentModel(dropout=Config.dropout)
-    train(model, train_data, val_data, Config.lr, Config.epochs)
+    train_bert(model, train_data, val_data, Config.lr, Config.epochs)
