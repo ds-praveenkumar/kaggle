@@ -4,3 +4,6 @@ datasets
 src/__pycache__
 src/commonlitreadabilityprize/__pycache__/config.cpython-38.pyc
 src/us-patent-phrase-to-phrase-matching/__pycache__/*
+
+**/*.csv
+**/*.pdb
